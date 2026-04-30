@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #define MAX_SIZE 4096
 
 typedef enum{
@@ -96,10 +97,16 @@ int lexer(char *s)
 
 int main()
 {
-    char *buff;
-    while(strcmp(buff,"quit\n")!=0 && strcmp(buff,"exit\n")!=0){
+    char *buff = NULL;
+    size_t len = 0;
+    ssize_t bytes_read;
+    do {
         printf("> ");
-        fgets(buff,MAX_SIZE,stdin);
+        bytes_read = getline(&buff, &len, stdin);
+        if(bytes_read == -1){
+            printf("\n");
+            break;
+        }
         if(lexer(buff) == 0){
             if(!(*buff == '\0' || *buff == '\n')){
                 int x = parse_or();
@@ -108,5 +115,7 @@ int main()
                 current_tokens_index = 0;
             }
         }else{printf("ERROR: UNEXPECTED CHARACTER !!!!\n");}
-    }
+    }while( ( strcmp(buff,"quit\n")!=0 && strcmp(buff,"exit\n")!=0 ));
+
+    free(buff);
 }
